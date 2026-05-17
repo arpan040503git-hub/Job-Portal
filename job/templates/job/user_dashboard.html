@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+
+    <link rel="stylesheet" href="{% static 'css/user_style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="container navbar-content">
+
+        <div class="logo">
+            <a href="/">
+                <i class="fas fa-certificate"></i>
+                <span>Job Portal</span>
+            </a>
+        </div>
+
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search jobs...">
+        </div>
+
+        <div class="nav-actions">
+            <i class="far fa-bell"></i>
+
+            <div class="profile-menu">
+
+                {% if user.profile.profile_pic %}
+                    <img src="{{ user.profile.profile_pic.url }}" class="avatar-sm">
+                {% else %}
+                    <div class="avatar-sm avatar-fallback">
+                        {{ user.username|first|upper }}
+                    </div>
+                {% endif %}
+
+                <div class="dropdown">
+                    <div class="dropdown-user">
+                        <strong>{{ user.username }}</strong>
+                        <small>{{ user.email }}</small>
+                    </div>
+
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="#">Edit Profile</a>
+                    <a href="{% url 'logout' %}">Logout</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container dashboard-grid">
+
+    <!-- LEFT -->
+    <aside class="sidebar">
+
+        <div class="card profile-card">
+
+            {% if user.profile.profile_pic %}
+                <img src="{{ user.profile.profile_pic.url }}" class="avatar-lg">
+            {% else %}
+                <div class="avatar-lg avatar-fallback-lg">
+                    {{ user.username|first|upper }}
+                </div>
+            {% endif %}
+
+            <h3>{{ user.username }}</h3>
+
+            <p>
+                {% if skills_list %}
+                    {{ skills_list.0 }}
+                {% else %}
+                    Job Seeker
+                {% endif %}
+            </p>
+
+
+            <button class="btn-outline">
+                Edit Profile
+            </button>
+
+        </div>
+
+        <div class="card menu-card">
+            <a href="#" class="active">
+                <i class="fas fa-th-large"></i>
+                Dashboard
+            </a>
+
+            <a href="#">
+                <i class="fas fa-file-alt"></i>
+                My Resume
+            </a>
+
+            <a href="#">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ profile.location|default:"Location not set" }}
+            </a>
+
+            <a href="#">
+                <i class="fas fa-phone"></i>
+                {{ profile.phone|default:"Phone not added" }}
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- CENTER -->
+    <section class="main-content">
+
+        <div class="stats-row">
+
+            <div class="stat-box">
+                <span class="stat-num">
+                    {{ matched_jobs|length }}
+                </span>
+                <span class="stat-label">
+                    Matched Jobs
+                </span>
+            </div>
+
+            <div class="stat-box">
+                <span class="stat-num">
+                    {{ applied_count }}
+                </span>
+                <span class="stat-label">
+                    Applied Jobs
+                </span>
+            </div>
+
+            <div class="stat-box">
+                <span class="stat-num">
+                    {{ skills_list|length }}
+                </span>
+                <span class="stat-label">
+                    Skills
+                </span>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="card-header">
+                <h2>Your Skills</h2>
+            </div>
+
+            <div class="application-list">
+
+                {% for skill in skills_list %}
+                    <div class="app-item">
+                        <div class="comp-logo">
+                            {{ skill|first|upper }}
+                        </div>
+
+                        <div class="app-info">
+                            <strong>{{ skill }}</strong>
+                            <p>Extracted from Resume</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p>No skills found.</p>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- RIGHT -->
+    <aside class="right-col">
+
+        <div class="card">
+
+            <div class="card-header">
+                <h2>Jobs for You</h2>
+            </div>
+
+            <div class="suggested-jobs">
+
+                {% for job in matched_jobs %}
+
+                    <div class="suggest-item">
+                        <strong>{{ job.title }}</strong>
+                        <p>{{ job.company }} • {{ job.location }}</p>
+                        <span class="salary">₹{{ job.salary }}</span>
+                    </div>
+
+                {% empty %}
+
+                    <p>No matched jobs yet.</p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </aside>
+
+</main>
+
+</body>
+</html>

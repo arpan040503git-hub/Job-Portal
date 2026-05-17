@@ -1,0 +1,457 @@
+:root {
+  --bg: #f5f6f8;
+  --white: #ffffff;
+  --primary: #28a745;
+  --primary-light: #e6f7f0;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --hover: #f3f4f6;
+  --radius: 10px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+body {
+  background: var(--bg);
+}
+
+/* ================= NAVBAR ================= */
+
+.nav-bar {
+  height: 70px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 30px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.right-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* ================= PROFILE ================= */
+
+/* ================= PROFILE MENU ================= */
+
+.profile-menu {
+  position: relative;
+  padding-bottom: 10px;
+}
+
+/* PROFILE ICON */
+
+.profile-icon {
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    background: #2563eb !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    flex-shrink: 0;
+}
+
+.profile-icon img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block;
+}
+
+/* DROPDOWN */
+
+.dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 220px;
+
+  background: white;
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  opacity: 0;
+  visibility: hidden;
+
+  transform: translateY(10px);
+
+  transition: 0.2s ease;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+  z-index: 999;
+}
+
+/* SHOW DROPDOWN */
+
+.profile-menu:hover .dropdown {
+  opacity: 1;
+  visibility: visible;
+
+  transform: translateY(0);
+}
+
+/* USER INFO */
+
+.dropdown-user {
+  padding: 15px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.dropdown-user strong {
+  display: block;
+
+  font-size: 14px;
+}
+
+.dropdown-user small {
+  font-size: 12px;
+
+  color: var(--muted);
+}
+
+/* LINKS */
+
+.dropdown a {
+  display: block;
+
+  width: 100%;
+
+  padding: 12px 15px;
+
+  transition: 0.2s;
+}
+
+.dropdown a:hover {
+  background: var(--hover);
+}
+
+/* ================= MAIN ================= */
+
+main {
+  width: 90%;
+  margin: 20px auto;
+}
+
+/* ================= FILTER BAR ================= */
+
+.top-filter-bar {
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  padding: 15px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ================= SEARCH ================= */
+
+.search-form {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+}
+
+.search-box {
+  flex: 1;
+
+  width: 100%;
+
+  padding: 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  outline: none;
+
+  background: white;
+
+  font-size: 14px;
+}
+
+.search-form button {
+  height: 44px;
+
+  padding: 0 20px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: var(--primary);
+  color: white;
+
+  cursor: pointer;
+}
+
+/* ================= TAGS ================= */
+
+.job-titles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.job-titles span {
+  background: var(--hover);
+
+  padding: 7px 14px;
+
+  border-radius: 20px;
+
+  font-size: 13px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.job-titles span:hover {
+  background: var(--primary-light);
+}
+
+/* ================= FILTERS ================= */
+
+.filters {
+  display: flex;
+  gap: 10px;
+}
+
+.filters select {
+  padding: 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  background: white;
+}
+
+/* ================= LAYOUT ================= */
+
+.job-layout {
+  display: flex;
+  gap: 20px;
+
+  margin-top: 20px;
+}
+
+/* ================= LEFT PANEL ================= */
+
+.job-list {
+  width: 30%;
+  max-height: 650px;
+
+  overflow-y: auto;
+}
+
+.job-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.job-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+/* ================= JOB CARD ================= */
+
+.job-card {
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  padding: 15px;
+
+  margin-bottom: 12px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.job-card:hover {
+  background: var(--hover);
+}
+
+.job-card.active {
+  border-left: 4px solid var(--primary);
+  background: var(--primary-light);
+}
+
+.job-card h3 {
+  font-size: 17px;
+  margin-bottom: 5px;
+}
+
+.company {
+  font-size: 13px;
+  color: var(--muted);
+
+  margin: 5px 0;
+}
+
+.salary {
+  color: var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ================= RIGHT PANEL ================= */
+
+.job-detail {
+  width: 70%;
+
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  padding: 25px;
+}
+
+.job-detail h2 {
+  margin-bottom: 5px;
+}
+
+.detail-section {
+  margin-top: 20px;
+}
+
+.detail-section h4 {
+  margin-bottom: 8px;
+}
+
+.detail-section p,
+.detail-section li {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ================= SKILLS ================= */
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skills span {
+  background: var(--hover);
+
+  padding: 6px 10px;
+
+  border-radius: 6px;
+
+  font-size: 12px;
+}
+
+/* ================= BUTTON ================= */
+
+.apply-btn {
+  margin-top: 20px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: var(--primary);
+  color: white;
+
+  cursor: pointer;
+
+  padding: 12px 18px;
+
+  font-weight: 600;
+}
+
+.apply-btn.big {
+  width: 100%;
+}
+
+.resume-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.resume-popup {
+    width: 420px;
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+.resume-popup h2 {
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+
+.resume-popup p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.resume-popup input[type="file"] {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.resume-popup button {
+    width: 100%;
+    padding: 14px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}

@@ -1,0 +1,239 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Portal</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+  </head>
+
+  <body>
+    <!-- NAVBAR -->
+    <nav class="nav-bar">
+      <div class="logo"><a href='/'>JobPortal</a></div>
+
+      <div class="right-nav">
+        {% if user.is_authenticated and user.profile.role == "user" %}
+        <div class="profile-menu">
+            <div class="profile-icon">
+                {% if user.profile.profile_pic %}
+                    <img src="{{ user.profile.profile_pic.url }}" alt="Profile">
+                {% else %}
+                    {{ user.username|first|upper }}
+                {% endif %}
+            </div>
+            <div class="dropdown">
+                <div class="dropdown-user">
+                    <strong>{{ user.username }}</strong>
+                    <small>{{ user.email }}</small>
+                </div>
+                <a href="{% url 'user_dashboard' %}">
+                    Dashboard
+                </a>
+                <a href="#">
+                    My Profile
+                </a>
+                <a href="{% url 'logout' %}">
+                    Logout
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <a href="{% url 'login' %}">
+            Login / Sign Up
+        </a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <main>
+      <!-- TOP FILTER BAR -->
+      <div class="top-filter-bar">
+        <form method="GET" class="search-form">
+          <input
+            type="text"
+            name="search"
+            placeholder="Search jobs..."
+            class="search-box"
+            value="{{ request.GET.search }}"
+          >
+          <button type="submit">Search</button>
+        </form>
+
+        <div class="job-titles">
+          {% for t in titles %}
+         <a href="?title={{ t|urlencode }}"
+              class="{% if request.GET.title == t %}active{% endif %}">
+               <span>
+              {{ t }}
+              </span>
+            </a>
+          {% endfor %}
+
+          {% for ty in types %}
+          <a href="?job_type={{ ty|urlencode }}"
+            class="{% if request.GET.job_type == ty %}active{% endif %}">
+              <span>{{ ty }}</span>
+          </a>
+          {% endfor %}
+        </div>
+
+        <div class="filters">
+
+            <select onchange="window.location.href=this.value;">
+                <option selected disabled>
+                    Location
+                </option>
+
+                {% for loc in locations %}
+                <option
+                    value="?location={{ loc|urlencode }}"
+                    {% if request.GET.location == loc %}selected{% endif %}
+                >
+                    {{ loc }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select onchange="window.location.href=this.value;">
+                <option selected disabled>Job Type</option>
+
+                {% for ty in types %}
+                <option
+                    value="?job_type={{ ty|urlencode }}"
+                    {% if request.GET.job_type == ty %}selected{% endif %}
+                >
+                    {{ ty }}
+                </option>
+                {% endfor %}
+            </select>
+
+        </div>
+      </div>
+
+      <!-- JOB LAYOUT -->
+      <div class="job-layout">
+        <!-- LEFT JOB LIST -->
+        <div class="job-list">
+          {% if jobs %}
+            {% for job in jobs %}            
+            <a href="?{% if request.GET.title %}title={{ request.GET.title }}&{% endif %}job_id={{ job.id }}">
+              <div class="job-card {% if job.id == s_job.id %}active{% endif %}">
+                <h3>{{ job.title }}</h3>
+                <p class="company">
+                  {{ job.company }} • {{ job.location }}
+                  {% if job.location != "Remote" %} • {{ job.type }} {% endif %}
+                </p>
+                <p class="salary">₹ {{ job.salary }}</p>
+              </div>
+            </a>
+          {% endfor %}
+          {% else %}
+          <p>No jobs available</p>
+          {% endif %}
+        </div>
+
+        <!-- RIGHT DETAIL PANEL -->
+        <div class="job-detail">
+
+          {% if s_job %}
+          <h2>{{ s_job.title }}</h2>
+          <p class="company">
+            {{ s_job.company }} • {{ s_job.location }}
+            {% if s_job.location != "Remote" %} • {{ s_job.type }} {% endif %}
+          </p>
+
+          <div class="detail-section">
+            <h4>Description</h4>
+            <p>{{ s_job.description }}</p>
+          </div>
+
+          <div class="detail-section">
+            <h4>Responsibilities</h4>
+            <ul>
+              {% for r in job_responsibilities %}
+                <li>{{ r }}</li>
+              {% empty %}
+                <li>No responsibilities listed</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="detail-section">
+            <h4>Skills</h4>
+            <div class="skills">
+              {% for skill in job_skills %}
+                <span>{{ skill }}</span>
+              {% empty %}
+                <span>No skills listed</span>
+              {% endfor %}
+            </div>
+          </div>
+
+        {% if user.is_authenticated and user.profile.role == "user" %}
+
+              <a href="{% url 'apply_job' s_job.id %}">
+                  <button>
+                      Apply Now
+                  </button>
+              </a>
+
+          {% elif not user.is_authenticated %}
+
+              <a href="{% url 'login' %}">
+                  <button>
+                      Login to Apply
+                  </button>
+              </a>
+
+          {% endif %}
+
+          {% else %}
+            <p>Select a job to view details</p>
+          {% endif %}
+
+        </div>
+      </div>
+    </main>
+    {% if show_resume_popup %}
+
+    <div class="resume-popup-overlay">
+        <div class="resume-popup">
+
+            <h2>Complete Your Profile</h2>
+
+            <p>
+                Upload your resume and let AI auto-fill your profile.
+            </p>
+
+            <form
+                action="{% url 'upload_resume' %}"
+                method="POST"
+                enctype="multipart/form-data"
+            >
+                {% csrf_token %}
+
+                <input
+                    type="file"
+                    name="resume"
+                    accept=".pdf"
+                    required
+                >
+
+                <button type="submit">
+                    Upload Resume
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    {% endif %}
+  </body>
+</html>
