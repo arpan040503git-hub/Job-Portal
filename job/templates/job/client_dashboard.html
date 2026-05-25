@@ -1,175 +1,297 @@
-{% load static  %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/client_style.css'%}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{% static 'css/client_style.css' %}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="navbar">
-        <div class="container navbar-content">
-            <div class="logo">
-                <a href="/">
-                <i class="fas fa-certificate"></i> <span>Job Portal 
-                </a>   
-                <small>Employer</small></span>
-            </div>
-                <div class="nav-actions">
-                    <i class="far fa-bell"></i>
-
-                    <div class="profile-icon">
-                       {% if user.profile.profile_pic %}
-                            <img src="{{ user.profile.profile_pic.url }}" class="avatar-sm">
-                        {% else %}
-                            <div class="avatar-sm avatar-fallback">
-                                {{ user.username|first|upper }}
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-        </div>
-    </header>
-
-    <main class="container dashboard-main">
+<header class="navbar">
+    <div class="container navbar-content">
+        <div class="logo">
+            
+                <span>Job Portal</span>
         
-        <!-- Stats Section -->
-        <section class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fas fa-briefcase"></i></div>
-                <div>
-                    <h3>14</h3>
-                    <p>Total Posts</p>
-                </div>
+            <small>Employer</small>
+        </div>
+
+        <div class="nav-actions">
+            <i class="far fa-bell"></i>
+
+            <a href="{% url 'home' %}"
+            style="text-decoration:none; margin-right:10px;">
+                Home
+            </a>
+
+            <a href="{% url 'logout' %}"
+            style="text-decoration:none; margin-right:10px;">
+                Logout
+            </a>
+
+            <div class="profile-icon">
+                {% if user.profile.profile_pic %}
+                    <img src="{{ user.profile.profile_pic.url }}" class="avatar-sm">
+                {% else %}
+                    <div class="avatar-sm avatar-fallback">
+                        {{ user.username|first|upper }}
+                    </div>
+                {% endif %}
             </div>
-            <div class="stat-card">
-                <div class="stat-icon icon-green"><i class="fas fa-users"></i></div>
-                <div>
-                    <h3>128</h3>
-                    <p>Total Applicants</p>
+        </div>
+    </div>
+</header>
+
+<main class="container dashboard-main">
+
+    <!-- Stats -->
+    <section class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <div>
+                <h3>{{ total_posts }}</h3>
+                <p>Total Posts</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-green">
+                <i class="fas fa-users"></i>
+            </div>
+            <div>
+                <h3>{{ total_applicants }}</h3>
+                <p>Total Applicants</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid-layout">
+
+        <!-- LEFT FORM -->
+        <section class="form-section">
+            <div class="card">
+
+                <div class="card-header">
+                    <h2>
+                        {% if edit_job %}
+                            Edit Job Recruitment
+                        {% else %}
+                            Create New Job Recruitment
+                        {% endif %}
+                    </h2>
+
+                    <p>Fill in the details to find your next top talent.</p>
                 </div>
+
+                <form method="POST" class="job-form">
+                    {% csrf_token %}
+
+                    {% if edit_job %}
+                        <input type="hidden" name="job_id" value="{{ edit_job.id }}">
+                    {% endif %}
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label>Job Title</label>
+                            <input type="text"
+                                   name="title"
+                                   placeholder="e.g. Senior Python Developer"
+                                   value="{{ edit_job.title|default:'' }}"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Company Name</label>
+                            <input type="text"
+                                   name="company"
+                                   placeholder="e.g. Jobored Inc."
+                                   value="{{ edit_job.company|default:'' }}"
+                                   required>
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text"
+                                   name="location"
+                                   placeholder="e.g. New York (Remote)"
+                                   value="{{ edit_job.location|default:'' }}"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Job Type</label>
+                            <select name="job_type">
+                                <option value="Full-time"
+                                    {% if edit_job.job_type == "Full-time" %}selected{% endif %}>
+                                    Full-time
+                                </option>
+
+                                <option value="Part-time"
+                                    {% if edit_job.job_type == "Part-time" %}selected{% endif %}>
+                                    Part-time
+                                </option>
+
+                                <option value="Contract"
+                                    {% if edit_job.job_type == "Contract" %}selected{% endif %}>
+                                    Contract
+                                </option>
+
+                                <option value="Remote"
+                                    {% if edit_job.job_type == "Remote" %}selected{% endif %}>
+                                    Remote
+                                </option>
+
+                                <option value="Freelance"
+                                    {% if edit_job.job_type == "Freelance" %}selected{% endif %}>
+                                    Freelance
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Salary</label>
+                            <input type="number"
+                                   name="salary"
+                                   placeholder="e.g. 80000"
+                                   value="{{ edit_job.salary|default:'' }}"
+                                   required>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job Description</label>
+                        <textarea name="description"
+                                  rows="4"
+                                  placeholder="Describe the role in detail...">{{ edit_job.description|default:'' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Responsibilities</label>
+                        <textarea name="responsibilities"
+                                  rows="3"
+                                  placeholder="List daily tasks...">{{ edit_job.responsibilities|default:'' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Required Skills</label>
+                        <input type="text"
+                               name="skills"
+                               placeholder="e.g. Python, Django, AWS (comma separated)"
+                               value="{{ edit_job.skills|default:'' }}">
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        {% if edit_job %}
+                            Update Job
+                        {% else %}
+                            Post Job Recruitment
+                        {% endif %}
+                    </button>
+
+                </form>
             </div>
         </section>
 
-        <div class="grid-layout">
-            <!-- Left: Create Post Form -->
-            <section class="form-section">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Create New Job Recruitment</h2>
-                        <p>Fill in the details to find your next top talent.</p>
-                    </div>
-                    
-                    <form action="#" method="POST" class="job-form">
-                      {% csrf_token %} 
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Job Title</label>
-                                <input type="text" name="title" placeholder="e.g. Senior Python Developer" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Company Name</label>
-                                <input type="text" name="company" placeholder="e.g. Jobored Inc." required>
-                            </div>
-                        </div>
+        <!-- RIGHT POSTS -->
+        <aside class="manage-section">
+            <div class="card">
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Location</label>
-                                <input type="text" name="location" placeholder="e.g. New York (Remote)" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Job Type</label>
-                                <select name="job_type">
-                                    <option value="Full-time">Full-time</option>
-                                    <option value="Part-time">Part-time</option>
-                                    <option value="Contract">Contract</option>
-                                    <option value="Freelance">Freelance</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Salary (USD)</label>
-                                <input type="number" name="salary" placeholder="e.g. 80000" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Job Description</label>
-                            <textarea name="description" rows="4" placeholder="Describe the role in detail..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Responsibilities</label>
-                            <textarea name="responsibilities" rows="3" placeholder="List daily tasks..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Required Skills</label>
-                            <input type="text" name="skills" placeholder="e.g. Python, Django, AWS (comma separated)">
-                        </div>
-
-                        <button type="submit" class="btn-primary">Post Job Recruitment</button>
-                    </form>
+                <div class="card-header">
+                    <h2>Your Recent Posts</h2>
                 </div>
-            </section>
 
-            <!-- Right: Recent Posts List -->
-            <aside class="manage-section">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Your Recent Posts</h2>
+                <div class="mini-post-list">
+
+                    {% for job in jobs %}
+
+                    <div class="mini-post">
+
+                        <div class="mini-post-info">
+                            <strong>{{ job.title }}</strong>
+
+                            <small>
+                                Posted {{ job.created_at|timesince }} ago
+                            </small>
+                        </div>
+
+                        <div class="mini-post-actions">
+
+                            <a href="{% url 'client_dashboard' %}?edit={{ job.id }}">
+                                <button type="button" class="btn-icon">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </a>
+
+                            <form action="{% url 'delete_job' job.id %}" method="POST">
+                                {% csrf_token %}
+                                <button class="btn-icon text-red">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+
+                        </div>
+
                     </div>
-                    <div class="mini-post-list">
 
-                        {% for job in jobs %}
+                    {% empty %}
+                        <p>No jobs posted yet</p>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+            <div class="card" style="margin-top:20px;">
+
+                <div class="card-header">
+                    <h2>Applicants</h2>
+                </div>
+
+                <div class="mini-post-list">
+
+                    {% for app in applications %}
 
                         <div class="mini-post">
-
                             <div class="mini-post-info">
 
-                                <strong>{{ job.title }}</strong>
+                                {% if app.user.userprofile.resume %}
+                                    <a href="{{ app.user.userprofile.resume.url }}" target="_blank">
+                                        <strong>{{ app.user.username }}</strong>
+                                    </a>
+                                {% else %}
+                                    <strong>{{ app.user.username }}</strong>
+                                {% endif %}
 
                                 <small>
-                                    Posted {{ job.created_at|timesince }} ago
+                                    {{ app.job.title }} • {{ app.status }}
                                 </small>
 
                             </div>
-
-                            <div class="mini-post-actions">
-
-                                <a href="{% url 'edit_job' job.id %}">
-                                    <button class="btn-icon">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </a>
-
-                                <a href="{% url 'delete_job' job.id %}">
-                                    <button class="btn-icon text-red">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </a>
-
-                            </div>
-
                         </div>
 
-                        {% empty %}
+                    {% empty %}
+                        <p>No applicants yet</p>
+                    {% endfor %}
 
-                        <p>No jobs posted yet</p>
-
-                        {% endfor %}
-
-                    </div>
-                    <button class="btn-outline-full">View All Posts</button>
                 </div>
-            </aside>
-        </div>
-    </main>
+
+            </div>
+        </aside>
+
+    </div>
+</main>
 
 </body>
 </html>

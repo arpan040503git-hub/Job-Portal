@@ -7,9 +7,14 @@ def extract_pdf_text(pdf_file):
         filetype="pdf"
     )
 
-    text = ""
+    text = []
 
     for page in doc:
-        text += page.get_text()
+        page_text = page.get_text("text")
 
-    return text
+        if page_text and page_text.strip():
+            text.append(page_text)
+
+    final_text = "\n".join(text)
+
+    return final_text

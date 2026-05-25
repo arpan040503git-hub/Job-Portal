@@ -36,9 +36,6 @@
                 <a href="{% url 'user_dashboard' %}">
                     Dashboard
                 </a>
-                <a href="#">
-                    My Profile
-                </a>
                 <a href="{% url 'logout' %}">
                     Logout
                 </a>
@@ -128,7 +125,7 @@
                 <h3>{{ job.title }}</h3>
                 <p class="company">
                   {{ job.company }} • {{ job.location }}
-                  {% if job.location != "Remote" %} • {{ job.type }} {% endif %}
+                  {% if job.location != "Remote" %} • {{ job.job_type }} {% endif %}
                 </p>
                 <p class="salary">₹ {{ job.salary }}</p>
               </div>
@@ -175,7 +172,46 @@
               {% endfor %}
             </div>
           </div>
+          {% if ats_data %}
+<div class="ats-box">
 
+    <h3>ATS Match Score: {{ ats_data.ats_score }}%</h3>
+
+    <div class="ats-section">
+        <h4>Matched Skills</h4>
+        <div class="skills">
+            {% for skill in ats_data.matched_skills %}
+                <span>{{ skill }}</span>
+            {% empty %}
+                <span>No matched skills</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="ats-section">
+            <h4>Missing Skills</h4>
+            <div class="skills">
+                {% for skill in ats_data.missing_skills %}
+                    <span>{{ skill }}</span>
+                {% empty %}
+                    <span>No missing skills</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="ats-section">
+            <h4>Suggestions</h4>
+            <ul>
+                {% for tip in ats_data.suggestions %}
+                    <li>{{ tip }}</li>
+                {% empty %}
+                    <li>No suggestions</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+    {% endif %}
         {% if user.is_authenticated and user.profile.role == "user" %}
 
               <a href="{% url 'apply_job' s_job.id %}">

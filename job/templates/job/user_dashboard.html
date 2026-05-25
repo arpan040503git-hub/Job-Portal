@@ -15,10 +15,8 @@
     <div class="container navbar-content">
 
         <div class="logo">
-            <a href="/">
-                <i class="fas fa-certificate"></i>
+                
                 <span>Job Portal</span>
-            </a>
         </div>
 
         <div class="search-bar">
@@ -45,9 +43,15 @@
                         <small>{{ user.email }}</small>
                     </div>
 
-                    <a href="{% url 'home' %}">Home</a>
-                    <a href="#">Edit Profile</a>
-                    <a href="{% url 'logout' %}">Logout</a>
+                    <a href="{% url 'home' %}"
+                    style="text-decoration:none; margin-right:10px;">
+                        Home
+                    </a>
+
+                    <a href="{% url 'logout' %}"
+                    style="text-decoration:none; margin-right:10px;">
+                        Logout
+                    </a>
                 </div>
 
             </div>
@@ -80,10 +84,20 @@
                 {% endif %}
             </p>
 
+            <!-- Resume Upload / Update -->
+            <form action="{% url 'upload_resume' %}" method="POST" enctype="multipart/form-data" style="margin-top:15px;">
+                {% csrf_token %}
 
-            <button class="btn-outline">
-                Edit Profile
-            </button>
+                <input type="file" name="resume" accept=".pdf" required style="width:100%; margin-bottom:10px;">
+
+                <button type="submit" class="btn-outline" style="width:100%;">
+                    {% if profile.resume %}
+                        Update Resume
+                    {% else %}
+                        Upload Resume
+                    {% endif %}
+                </button>
+            </form>
 
         </div>
 
@@ -93,10 +107,17 @@
                 Dashboard
             </a>
 
-            <a href="#">
-                <i class="fas fa-file-alt"></i>
-                My Resume
-            </a>
+            {% if profile.resume %}
+                <a href="{{ profile.resume.url }}" target="_blank">
+                    <i class="fas fa-file-alt"></i>
+                    View My CV
+                </a>
+            {% else %}
+                <a href="#">
+                    <i class="fas fa-file-alt"></i>
+                    No Resume Uploaded
+                </a>
+            {% endif %}
 
             <a href="#">
                 <i class="fas fa-map-marker-alt"></i>
@@ -194,9 +215,7 @@
                     </div>
 
                 {% empty %}
-
                     <p>No matched jobs yet.</p>
-
                 {% endfor %}
 
             </div>

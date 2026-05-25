@@ -4,6 +4,10 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from resume_ai.services import analyze_job_match
+from resume_ai.utils import extract_pdf_text
+from django.contrib import admin
+
 
 
 # REGISTER
@@ -98,57 +102,101 @@ def client_dashboard(request):
     if request.user.profile.role != "client":
         return redirect("home")
 
-    if request.method == "POST":
-        Job.objects.create(
-            posted_by=request.user,
-            title=request.POST.get("title"),
-            company=request.POST.get("company"),
-            location=request.POST.get("location"),
-            job_type=request.POST.get("job_type"),
-            salary=request.POST.get("salary"),
-            description=request.POST.get("description"),
-            responsibilities=request.POST.get("responsibilities"),
-            skills=request.POST.get("skills"),
+    edit_job_obj = None
+
+    edit_id = request.GET.get("edit")
+
+    if edit_id:
+        edit_job_obj = get_object_or_404(
+            Job,
+            id=edit_id,
+            posted_by=request.user
         )
+
+    if request.method == "POST":
+
+        job_id = request.POST.get("job_id")
+
+        # UPDATE EXISTING JOB
+        if job_id:
+
+            job = get_object_or_404(
+                Job,
+                id=job_id,
+                posted_by=request.user
+            )
+
+            job.title = request.POST.get("title")
+            job.company = request.POST.get("company")
+            job.location = request.POST.get("location")
+            job.job_type = request.POST.get("job_type")
+            job.salary = request.POST.get("salary")
+            job.description = request.POST.get("description")
+            job.responsibilities = request.POST.get("responsibilities")
+            job.skills = request.POST.get("skills")
+
+            job.save()
+
+        # CREATE NEW JOB
+        else:
+
+            Job.objects.create(
+                posted_by=request.user,
+                title=request.POST.get("title"),
+                company=request.POST.get("company"),
+                location=request.POST.get("location"),
+                job_type=request.POST.get("job_type"),
+                salary=request.POST.get("salary"),
+                description=request.POST.get("description"),
+                responsibilities=request.POST.get("responsibilities"),
+                skills=request.POST.get("skills"),
+            )
 
         return redirect("client_dashboard")
 
-    jobs = Job.objects.filter(posted_by=request.user).order_by("-created_at")
+    jobs = Job.objects.filter(
+    posted_by=request.user
+    ).order_by("-created_at")
 
-    return render(request, "job/client_dashboard.html", {"jobs": jobs})
+    total_posts = jobs.count()
+
+    total_applicants = Application.objects.filter(
+        job__posted_by=request.user
+    ).count()
+    applications = Application.objects.filter(
+        job__posted_by=request.user
+    ).select_related("user", "job").order_by("-applied_at")
+
+    return render(
+        request,
+        "job/client_dashboard.html",
+        {
+            "jobs": jobs,
+            "edit_job": edit_job_obj,
+            "total_posts": total_posts,
+            "total_applicants": total_applicants,
+            "applications": applications,
+        }
+    )
 
 
 # DELETE JOB
 @login_required
 def delete_job(request, id):
-    job = get_object_or_404(Job, id=id, posted_by=request.user)
 
-    job.delete()
+    if request.user.profile.role != "client":
+        return redirect("home")
 
-    return redirect("client_dashboard")
-
-
-# EDIT JOB
-@login_required
-def edit_job(request, id):
-    job = get_object_or_404(Job, id=id, posted_by=request.user)
+    job = get_object_or_404(
+        Job,
+        id=id,
+        posted_by=request.user
+    )
 
     if request.method == "POST":
-        job.title = request.POST.get("title")
-        job.company = request.POST.get("company")
-        job.location = request.POST.get("location")
-        job.job_type = request.POST.get("job_type")
-        job.salary = request.POST.get("salary")
-        job.description = request.POST.get("description")
-        job.responsibilities = request.POST.get("responsibilities")
-        job.skills = request.POST.get("skills")
+        job.delete()
 
-        job.save()
-
-        return redirect("client_dashboard")
-
-    return render(request, "job/edit_job.html", {"job": job})
-
+    return redirect("client_dashboard")
 
 # USER DASHBOARD
 @login_required
@@ -164,22 +212,26 @@ def user_dashboard(request):
     ).order_by('-applied_at')
 
     matched_jobs = Job.objects.none()
+    skills_list = []
 
     if profile.skills:
+
         skills_list = [
             skill.strip()
             for skill in profile.skills.split(",")
+            if skill.strip()
         ]
 
-        query = Q()
+        print("PROFILE SKILLS:", profile.skills)
+        print("SKILLS LIST:", skills_list)
 
-        for skill in skills_list:
-            query |= Q(skills__icontains=skill)
+        if skills_list:
+            query = Q()
 
-        matched_jobs = Job.objects.filter(query).distinct()[:5]
+            for skill in skills_list:
+                query |= Q(skills__icontains=skill)
 
-    else:
-        skills_list = []
+            matched_jobs = Job.objects.filter(query).distinct()[:5]
 
     context = {
         "profile": profile,
@@ -258,21 +310,34 @@ def get_selected_job(request, jobs):
 
     return jobs.first()
 
-
 # HOME
 def home(request):
-    titles = Job.objects.values_list("title", flat=True).distinct()
-    types = (
-        Job.objects.exclude(job_type="").values_list("job_type", flat=True).distinct()
-    )
 
-    locations = (
-        Job.objects.exclude(location="").values_list("location", flat=True).distinct()
-    )
+    titles = Job.objects.values_list("title", flat=True).distinct()
+    types = Job.objects.exclude(job_type="").values_list("job_type", flat=True).distinct()
+    locations = Job.objects.exclude(location="").values_list("location", flat=True).distinct()
 
     jobs = get_filtered_jobs(request)
-
     selected_job = get_selected_job(request, jobs)
+
+    ats_data = None
+
+    # SAFE PROFILE ACCESS
+    profile = getattr(request.user, "profile", None)
+
+    if request.user.is_authenticated and profile and profile.role == "user":
+
+        user_profile = getattr(request.user, "userprofile", None)
+
+        if user_profile and user_profile.resume and selected_job:
+            import os
+
+            resume_text = ""
+
+            if user_profile.resume and os.path.exists(user_profile.resume.path):
+                resume_text = extract_pdf_text(user_profile.resume)
+
+            ats_data = analyze_job_match(resume_text, selected_job)
 
     job_skills = []
     job_responsibilities = []
@@ -298,8 +363,12 @@ def home(request):
 
             "show_resume_popup": (
                 request.user.is_authenticated
-                and request.user.profile.role == "user"
+                and profile
+                and profile.role == "user"
+                and hasattr(request.user, "userprofile")
                 and not request.user.userprofile.profile_completed
-            )
+            ),
+
+            "ats_data": ats_data,
         }
-)
+    )

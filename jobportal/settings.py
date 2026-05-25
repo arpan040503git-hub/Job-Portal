@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -109,6 +110,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+import os
+
+load_dotenv()
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
