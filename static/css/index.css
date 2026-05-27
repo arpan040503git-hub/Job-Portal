@@ -412,72 +412,59 @@ main {
 .ats-section ul{
     padding-left:20px;
 }
+.ats-btn {
+    width: 100%;
+    padding: 14px 20px;
+    margin: 18px 0;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.ats-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+
+.ats-btn:active {
+    transform: scale(0.98);
+}
+
+.ats-btn:focus {
+    outline: none;
+}
 /* ================= BUTTON ================= */
 
-.apply-btn {
-  margin-top: 20px;
-
-  border: none;
-  border-radius: 8px;
-
-  background: var(--primary);
-  color: white;
-
-  cursor: pointer;
-
-  padding: 12px 18px;
-
-  font-weight: 600;
-}
-
-.apply-btn.big {
-  width: 100%;
-}
-
-.resume-popup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.resume-popup {
-    width: 420px;
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    text-align: center;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-}
-
-.resume-popup h2 {
-    margin-bottom: 10px;
-    font-size: 24px;
-}
-
-.resume-popup p {
-    color: #666;
-    margin-bottom: 20px;
-}
-
-.resume-popup input[type="file"] {
+.job-detail button {
     width: 100%;
-    margin-bottom: 20px;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-}
-
-.resume-popup button {
-    width: 100%;
-    padding: 14px;
-    background: #2563eb;
-    color: white;
+    padding: 14px 20px;
+    margin-top: 20px;
     border: none;
-    border-radius: 10px;
-    cursor: pointer;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 16px;
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.job-detail button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+}
+
+.job-detail button:active {
+    transform: scale(0.98);
+}
+
+.job-detail button:focus {
+    outline: none;
 }

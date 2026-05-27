@@ -318,26 +318,52 @@ def home(request):
     locations = Job.objects.exclude(location="").values_list("location", flat=True).distinct()
 
     jobs = get_filtered_jobs(request)
-    selected_job = get_selected_job(request, jobs)
-
     ats_data = None
 
     # SAFE PROFILE ACCESS
     profile = getattr(request.user, "profile", None)
 
+    # Resume skills ke hisaab se matched jobs upar lao
     if request.user.is_authenticated and profile and profile.role == "user":
+        user_profile = getattr(request.user, "userprofile", None)
 
+        if user_profile and user_profile.skills:
+            skills_list = [
+                skill.strip()
+                for skill in user_profile.skills.split(",")
+                if skill.strip()
+            ]
+
+            if skills_list:
+                query = Q()
+
+                for skill in skills_list:
+                    query |= Q(skills__icontains=skill)
+
+                matched_jobs = jobs.filter(query).distinct()
+                other_jobs = jobs.exclude(
+                    id__in=matched_jobs.values_list("id", flat=True)
+                )
+
+                jobs = list(matched_jobs) + list(other_jobs)
+
+    # selected job after sorting
+    selected_job = jobs[0] if jobs else None
+
+    job_id = request.GET.get("job_id")
+    if job_id:
+        selected_job = get_object_or_404(Job, id=job_id)
+
+    # ATS score
+    if request.user.is_authenticated and profile and profile.role == "user":
         user_profile = getattr(request.user, "userprofile", None)
 
         if user_profile and user_profile.resume and selected_job:
             import os
 
-            resume_text = ""
-
-            if user_profile.resume and os.path.exists(user_profile.resume.path):
+            if os.path.exists(user_profile.resume.path):
                 resume_text = extract_pdf_text(user_profile.resume)
-
-            ats_data = analyze_job_match(resume_text, selected_job)
+                ats_data = analyze_job_match(resume_text, selected_job)
 
     job_skills = []
     job_responsibilities = []
@@ -360,7 +386,6 @@ def home(request):
             "types": types,
             "job_skills": job_skills,
             "job_responsibilities": job_responsibilities,
-
             "show_resume_popup": (
                 request.user.is_authenticated
                 and profile
@@ -368,7 +393,6 @@ def home(request):
                 and hasattr(request.user, "userprofile")
                 and not request.user.userprofile.profile_completed
             ),
-
             "ats_data": ats_data,
         }
-    )
+    )    
