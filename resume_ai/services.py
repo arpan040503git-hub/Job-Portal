@@ -13,34 +13,20 @@ client = Groq(
 def analyze_resume(text):
 
     prompt = f"""
-You are an expert resume parser.
+Extract data from this resume.
 
-Extract information from this resume.
+Return only JSON format.
 
-IMPORTANT RULES:
-- Extract ALL technical skills
-- Include programming languages
-- Include frameworks
-- Include tools
-- Include databases
-- Include projects
-- Include education
-- Include work experience
-- Return ONLY valid JSON
-- skills MUST be a JSON array
+Fields:
+- phone
+- location
+- skills
+- projects
+- education
+- experience
+- ats_score
 
-Return format:
-{{
-    "phone": "",
-    "location": "",
-    "skills": [],
-    "projects": [],
-    "education": [],
-    "experience": [],
-    "ats_score": 0
-}}
-
-RESUME TEXT:
+Resume:
 {text}
 """
 

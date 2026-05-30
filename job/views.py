@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from resume_ai.services import analyze_job_match
 from resume_ai.utils import extract_pdf_text
 from django.contrib import admin
+from django.contrib import messages
 
 
 
@@ -24,10 +25,10 @@ def register(request):
         profile_pic = request.FILES.get('profile_pic')
 
         if User.objects.filter(username=username).exists():
-            error = "User Already Exists"
+            messages.error(request, "User already exists")
 
         elif password != confirm_password:
-            error = "Passwords do not match"
+            messages.error(request, "Passwords do not match")
 
         else:
             user = User.objects.create_user(
@@ -52,6 +53,7 @@ def register(request):
                     user=user
                 )
 
+            messages.success(request, "Account created successfully")
             return redirect("login")
 
     return render(
@@ -74,7 +76,7 @@ def user_login(request):
 
         if user is not None:
             login(request, user)
-
+            messages.success(request, f"Welcome {user.username}")
             if user.is_superuser:
                 return redirect("/admin")
 
@@ -84,7 +86,7 @@ def user_login(request):
             return redirect("home")
 
         else:
-            error = "Invalid Username or Password"
+            messages.error(request, "Invalid Username or Password")
 
     return render(request, "job/login.html", {"error": error})
 

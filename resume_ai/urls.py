@@ -3,8 +3,8 @@ from . import views
 
 urlpatterns = [
     path(
-        'upload-resume/',
+        "upload-resume/",
         views.upload_resume,
-        name='upload_resume'
+        name="upload_resume"
     ),
 ]
